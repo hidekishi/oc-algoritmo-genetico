@@ -5,7 +5,7 @@ import lib
 population = np.array([])
 x = 4
 y = -3.4
-z = lib.fit_func(x, y)
+z = lib.fitFunc(x, y)
 
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
