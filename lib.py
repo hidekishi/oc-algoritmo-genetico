@@ -19,6 +19,7 @@ class population:
         self.elite_pop = int(elite*pop_size)
         self.individuals = self.initFirstGen()
         self.average_fit = -200
+        self.all_avg = []
     
     def initFirstGen(self):
         pop = []
@@ -28,7 +29,6 @@ class population:
             #print(pop[i].real_x, pop[i].real_y, pop[i].fit)
             fit_sum += pop[i].fit
         self.average_fit = fit_sum/self.pop_size
-        print(len(pop))
         return pop
     
     def plotGraph(self):
@@ -57,31 +57,41 @@ class population:
 
         ax.legend()
 
-        filename = "./graficos/gen"+str(self.generation)+".png"
+        filename = "./output/graficos-3d/gen"+str(self.generation)+".png"
         plt.savefig(filename)
         plt.close(fig)
 
         plt.scatter(x, y, color="red", label="Data points", alpha=0.01)
+        plt.xlabel("Gene X")
+        plt.ylabel("Gene Y")
+        plt.title(str(self.generation)+"° geração")
 
-        # Add labels, title, and legend
-        plt.xlabel("X-axis")
-        plt.ylabel("Y-axis")
-        plt.title("2D Scatter Plot")
-        plt.legend()
-
-        filename = "./graficos/gen"+str(self.generation)+"2d.png"
+        filename = "./output/graficos-2d/gen"+str(self.generation)+".png"
         plt.savefig(filename)
         plt.close(fig)
 
 
     def displayResults(self):
         self.plotGraph()
-        filename = "avg_fitness.txt"
+        filename = "./output/avg_fitness.txt"
         data = str(self.generation)+"° geração => fitness médio = "+str(self.average_fit)+"\n"
+        print(str(self.generation)+"° geração = "+str(self.average_fit))
+        self.all_avg.append(self.average_fit)
 
         # Open the file in write mode ('w')
         with open(filename, "a") as file:
             file.write(str(data))
+
+    def generalGraph(self):
+        plt.close("all")
+        print(np.mean(self.all_avg))
+        x = np.linspace(1, len(self.all_avg)+1, len(self.all_avg))
+        plt.plot(x, self.all_avg)
+        plt.xlabel("Geração")
+        plt.ylabel("Fitness médio")
+        plt.title("Média do fitness por geração")
+        filename = "./output/fitness-avg.png"
+        plt.savefig(filename)
 
     def cross(self, par_1, par_2): # Cruzamento por 1 ponto aleatorio
 
@@ -183,7 +193,6 @@ class population:
         self.individuals = new_gen
         self.generation += 1
 
-        print(len(self.individuals))
             
 def fitFunc(x, y):
     return -(np.power(x, 2) + np.power(y, 2)) + 4

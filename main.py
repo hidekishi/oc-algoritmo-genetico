@@ -1,8 +1,10 @@
 import lib
 
-oc = lib.population(5000, 0.8, 0.01, 0.01)
+oc = lib.population(5000, 0.7, 0.01, 0.01)
 oc.initFirstGen()
 
-for i in range(20):
+for i in range(10):
     oc.displayResults()
-    oc.initNewGeneration(500)
+    oc.initNewGeneration(2000)
+
+oc.generalGraph()
