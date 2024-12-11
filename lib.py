@@ -20,6 +20,7 @@ class population:
         self.individuals = self.initFirstGen()
         self.average_fit = -200
         self.all_avg = []
+        self.max_fitness = []
     
     def initFirstGen(self):
         pop = []
@@ -29,6 +30,13 @@ class population:
             #print(pop[i].real_x, pop[i].real_y, pop[i].fit)
             fit_sum += pop[i].fit
         self.average_fit = fit_sum/self.pop_size
+        max_fitness = -200
+        for i, ind in enumerate(pop):
+            if ind.fit > max_fitness:
+                max_fitness = ind.fit
+                max_x = ind.real_x
+                max_y = ind.real_y
+        self.max_fitness = [max_x, max_y, max_fitness]
         return pop
     
     def plotGraph(self):
@@ -44,7 +52,7 @@ class population:
             y.append(ind.real_y)
         z = fitFunc(x, y)
 
-        ax.scatter(x, y, z, color='red', s=10, label='Points', alpha=0.01)
+        ax.scatter(x, y, z, color='red', s=10, label='Points', alpha=0.05)
 
         ax.set_xlabel('Gene X')
         ax.set_ylabel('Gene Y')
@@ -61,7 +69,7 @@ class population:
         plt.savefig(filename)
         plt.close(fig)
 
-        plt.scatter(x, y, color="red", label="Data points", alpha=0.01)
+        plt.scatter(x, y, color="red", label="Data points", alpha=0.05)
         plt.xlabel("Gene X")
         plt.ylabel("Gene Y")
         plt.title(str(self.generation)+"° geração")
@@ -73,8 +81,8 @@ class population:
 
     def displayResults(self):
         self.plotGraph()
-        filename = "./output/avg_fitness.txt"
-        data = str(self.generation)+"° geração => fitness médio = "+str(self.average_fit)+"\n"
+        filename = "./output/avg_fitness.csv"
+        data = f"{self.generation}\t{self.average_fit}\t{self.max_fitness[2]}\t{self.max_fitness[0]}\t{self.max_fitness[1]}\n"
         print(str(self.generation)+"° geração = "+str(self.average_fit))
         self.all_avg.append(self.average_fit)
 
@@ -84,12 +92,13 @@ class population:
 
     def generalGraph(self):
         plt.close("all")
-        print(np.mean(self.all_avg))
-        x = np.linspace(1, len(self.all_avg)+1, len(self.all_avg))
-        plt.plot(x, self.all_avg)
+        print(f"Média total: {np.mean(self.all_avg)}")
+        x = np.linspace(2, len(self.all_avg)+1, len(self.all_avg)-1)
+        plt.plot(x, self.all_avg[1:])
         plt.xlabel("Geração")
         plt.ylabel("Fitness médio")
         plt.title("Média do fitness por geração")
+        plt.ylim(0, 4)
         filename = "./output/fitness-avg.png"
         plt.savefig(filename)
 
@@ -188,6 +197,14 @@ class population:
         fit_sum = 0
         for ind in new_gen:
             fit_sum += ind.fit
+        
+        max_fitness = -200
+        for i, ind in enumerate(new_gen):
+            if ind.fit > max_fitness:
+                max_fitness = ind.fit
+                max_x = ind.real_x
+                max_y = ind.real_y
+        self.max_fitness = [max_x, max_y, max_fitness]
 
         self.average_fit = fit_sum/self.pop_size
         self.individuals = new_gen
