@@ -52,7 +52,7 @@ class population:
             y.append(ind.real_y)
         z = fitFunc(x, y)
 
-        ax.scatter(x, y, z, color='red', s=10, label='Points', alpha=0.05)
+        ax.scatter(x, y, z, color='red', s=10, label='Points', alpha=0.02)
 
         ax.set_xlabel('Gene X')
         ax.set_ylabel('Gene Y')
@@ -69,7 +69,7 @@ class population:
         plt.savefig(filename)
         plt.close(fig)
 
-        plt.scatter(x, y, color="red", label="Data points", alpha=0.05)
+        plt.scatter(x, y, color="red", label="Data points", alpha=0.02)
         plt.xlabel("Gene X")
         plt.ylabel("Gene Y")
         plt.title(str(self.generation)+"° geração")
