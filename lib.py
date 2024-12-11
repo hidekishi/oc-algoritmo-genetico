@@ -28,6 +28,7 @@ class population:
             #print(pop[i].real_x, pop[i].real_y, pop[i].fit)
             fit_sum += pop[i].fit
         self.average_fit = fit_sum/self.pop_size
+        print(len(pop))
         return pop
     
     def plotGraph(self):
@@ -60,15 +61,27 @@ class population:
         plt.savefig(filename)
         plt.close(fig)
 
+        plt.scatter(x, y, color="red", label="Data points", alpha=0.01)
+
+        # Add labels, title, and legend
+        plt.xlabel("X-axis")
+        plt.ylabel("Y-axis")
+        plt.title("2D Scatter Plot")
+        plt.legend()
+
+        filename = "./graficos/gen"+str(self.generation)+"2d.png"
+        plt.savefig(filename)
+        plt.close(fig)
+
+
     def displayResults(self):
         self.plotGraph()
-        filename = "./fitness/"+str(self.generation)+"gen.txt"
-        data = self.average_fit
+        filename = "avg_fitness.txt"
+        data = str(self.generation)+"° geração => fitness médio = "+str(self.average_fit)+"\n"
 
         # Open the file in write mode ('w')
-        with open(filename, "w") as file:
+        with open(filename, "a") as file:
             file.write(str(data))
-
 
     def cross(self, par_1, par_2): # Cruzamento por 1 ponto aleatorio
 
@@ -150,7 +163,7 @@ class population:
         for i in elite_index:
             new_gen.append(self.individuals[i])
 
-        for i in range(self.elite_pop, self.pop_size):
+        for i in range(self.elite_pop, self.pop_size, 2):
             par_1, par_2 = self.sampling(sample_size)
             child_1_genes, child_2_genes = self.cross(par_1, par_2)
             #print(child_1_genes, child_2_genes)
@@ -169,8 +182,9 @@ class population:
         self.average_fit = fit_sum/self.pop_size
         self.individuals = new_gen
         self.generation += 1
-            
 
+        print(len(self.individuals))
+            
 def fitFunc(x, y):
     return -(np.power(x, 2) + np.power(y, 2)) + 4
 
@@ -192,10 +206,3 @@ def realToBinary(realNum):
     binaryNum = "0"*(14-len(binaryNum))+binaryNum
 
     return signalBit+binaryNum
-
-a = population(5000, 0.8, 0.01, 0.01)
-a.initFirstGen()
-a.displayResults()
-for i in range(20):
-    a.displayResults()
-    a.initNewGeneration(1000)
