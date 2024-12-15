@@ -2,7 +2,7 @@ import random
 import numpy as np
 import matplotlib.pyplot as plt
 
-class individual:
+class individual: # Classe com os genes e fitness de cada indivíduo da população
     def __init__(self, x, y):
         self.real_x = x
         self.real_y = y
@@ -10,7 +10,7 @@ class individual:
         self.bin_y = realToBinary(y)
         self.fit = fitFunc(self.real_x, self.real_y)
 
-class population:
+class population: # Classe da população. Conta com a lista dos indivíduos e também todos os métodos para iniciar gerações
     def __init__(self, pop_size, cross_rate, mutation_rate, elite):
         self.pop_size = pop_size
         self.generation = 1
@@ -22,7 +22,7 @@ class population:
         self.all_avg = []
         self.max_fitness = []
     
-    def initFirstGen(self):
+    def initFirstGen(self): # Inicializa a primeira geração. Os indivíduos são iniciados com genes aleatórios
         pop = []
         fit_sum = 0
         for i in range(self.pop_size):
@@ -39,7 +39,7 @@ class population:
         self.max_fitness = [max_x, max_y, max_fitness]
         return pop
     
-    def plotGraph(self):
+    def plotGraph(self): # Gera os gráficos 2D e 3D com base nos genes e fitness população atual
         fig = plt.figure()
         ax = fig.add_subplot(111, projection='3d')
 
@@ -78,8 +78,7 @@ class population:
         plt.savefig(filename)
         plt.close(fig)
 
-
-    def displayResults(self):
+    def displayResults(self): # Salva o fitness médio da geração em arquivo e chama o método de plot de gráficos
         self.plotGraph()
         filename = "./output/avg_fitness.csv"
         data = f"{self.generation}\t{self.average_fit}\t{self.max_fitness[2]}\t{self.max_fitness[0]}\t{self.max_fitness[1]}\n"
@@ -90,7 +89,7 @@ class population:
         with open(filename, "a") as file:
             file.write(str(data))
 
-    def generalGraph(self):
+    def generalGraph(self): # Gráfico final com base em todas as médias de cada uma das gerações
         plt.close("all")
         print(f"Média total: {np.mean(self.all_avg)}")
         x = np.linspace(2, len(self.all_avg)+1, len(self.all_avg)-1)
@@ -102,15 +101,15 @@ class population:
         filename = "./output/fitness-avg.png"
         plt.savefig(filename)
 
-    def cross(self, par_1, par_2): # Cruzamento por 1 ponto aleatorio
+    def cross(self, par_1, par_2): # Toma como parâmetro dois indivíduos. Ou os cruza para gerar outros 2 indivíduos ou retorna os próprios
 
-        def bound_check(bin_gene):
+        def bound_check(bin_gene): # Checa se o indivíduo gerado está nos limites do domínio
             real_gene = binaryToReal(bin_gene)
             if real_gene >= -10 and real_gene <= 10:
                 return True
             return False
         
-        def mutation(original_gene, mut_rate):
+        def mutation(original_gene, mut_rate): # Realiza a mutação no indivíduo por inversão binária
             mut_gene = []
             for bit in original_gene:
                 if random.randint(0, 100) < mut_rate:
@@ -127,9 +126,10 @@ class population:
             else:
                 return mut_gene_bin[0]+"10011100010000"
 
-        if random.randint(0, 100) >= self.cross_rate: # Define se o cruzamento ocorre. Se nao, retorna os pais
+        if random.randint(0, 100) >= self.cross_rate: # Define se o cruzamento ocorre. Caso não ocorra, retorna os pais
             return [par_1.real_x, par_1.real_y], [par_2.real_x, par_2.real_y]
 
+        # São feitos os cortes nos genes dos pais e com eles são gerados os dois filhos
         cut = random.randint(1, 13)
         par_1_bin_x = [par_1.bin_x[:cut], par_1.bin_x[cut:]]
         par_1_bin_y = [par_1.bin_y[:cut], par_1.bin_y[cut:]]
@@ -143,9 +143,9 @@ class population:
 
         return [binaryToReal(child_1_bin[0]), binaryToReal(child_1_bin[1])], [binaryToReal(child_2_bin[0]), binaryToReal(child_2_bin[1])]
 
-    def sampling(self, sample_size): # Selecao por torneio
+    def sampling(self, sample_size): # Separa uma amostra da população de tamanho fornecido
 
-        def select_ind(sample):
+        def select_ind(sample): # Seleciona o indivíduo como melhor fitness dentro da amostra
             max_fit = -200
             max_fit_index = 0
             for i, ind in enumerate(sample):
@@ -154,17 +154,18 @@ class population:
                     max_fit_index = i
             return sample[max_fit_index]
 
-        sample = random.sample(self.individuals, sample_size)
+        sample = random.sample(self.individuals, sample_size) # Recolhe a amostra da população
 
+        # A amostra é dividida em dois e de cada uma delas é selecionado um pai
         par_1 = select_ind(sample[:int(sample_size/2)])
         par_2 = select_ind(sample[int(sample_size/2):])
 
         return par_1, par_2
     
-    def initNewGeneration(self, sample_size):
+    def initNewGeneration(self, sample_size): # Inicia uma nova geração de acordo com a população atual
         #print(len(self.individuals))
 
-        def eliteSelect():
+        def eliteSelect(): # Retorna os índices dos n indivíduos com melhores fitness. n esse sendo uma parcela da população determinada pelo usuário
             elite_index = []
             for i in range(self.elite_pop):
                 max_fit = -200
@@ -179,13 +180,12 @@ class population:
         new_gen = []
 
         elite_index = eliteSelect()
-        for i in elite_index:
+        for i in elite_index: # Adiciona os indivíduos escolhidos na parte de elitismo
             new_gen.append(self.individuals[i])
 
-        for i in range(self.elite_pop, self.pop_size, 2):
+        for i in range(self.elite_pop, self.pop_size, 2): # Por meio do cruzamento ou repasse direto, são adicionados o resto dos indivíduos
             par_1, par_2 = self.sampling(sample_size)
             child_1_genes, child_2_genes = self.cross(par_1, par_2)
-            #print(child_1_genes, child_2_genes)
             child_1 = individual(child_1_genes[0], child_1_genes[1])
             child_2 = individual(child_2_genes[0], child_2_genes[1])
 
@@ -194,10 +194,12 @@ class population:
                 break
             new_gen.append(child_2)
 
+        # Cálculo do fitness médio da geração
         fit_sum = 0
         for ind in new_gen:
             fit_sum += ind.fit
         
+        # Cálculo do melhor fitness da geração
         max_fitness = -200
         for i, ind in enumerate(new_gen):
             if ind.fit > max_fitness:
@@ -207,13 +209,14 @@ class population:
         self.max_fitness = [max_x, max_y, max_fitness]
 
         self.average_fit = fit_sum/self.pop_size
-        self.individuals = new_gen
+        self.individuals = new_gen # Efetivamente substitui a geração atual pela nova
         self.generation += 1
 
             
-def fitFunc(x, y):
+def fitFunc(x, y): # Cálculo da função de aptidão
     return -(np.power(x, 2) + np.power(y, 2)) + 4
 
+# Conversores de bases numéricas
 def binaryToReal(binNum):
     signalBit = binNum[0]
     realNum = int(binNum[1:], 2)*0.001
